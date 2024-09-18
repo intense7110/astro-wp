@@ -14,7 +14,7 @@ jobs:
         run: npm install
       - name: Build project
         run: npm run build
-      - name: Deploy to Netlify (例)
+      - name: Deploy to Netlify
         run: npm run deploy
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
