@@ -1,4 +1,4 @@
-name: release
+name: rebuild
 
 on:
   repository_dispatch: # Webhookからトリガーするためのイベント
