@@ -1,0 +1,97 @@
+---
+import Layout from '../../layouts/Layout.astro'
+import { wpquery } from "../../graphql/wordPressQuery";
+import { Debug } from "astro:components";
+
+const { slug } = Astro.params;
+
+const data = await wpquery({
+  query: `
+    query getPost {
+      post(id: "${slug}", idType: SLUG) {
+        title
+        slug
+        content
+        date
+        modified
+        featuredImage {
+          node {
+            sourceUrl(size: MEDIUM_LARGE)
+            altText
+          }
+        }
+        categories {
+          edges {
+            node {
+              name
+              link
+            }
+          }
+        }
+        enqueuedScripts {
+          edges {
+            node {
+              handle
+              src
+            }
+          }
+        }
+        enqueuedStylesheets {
+          edges {
+            node {
+              handle
+              src
+            }
+          }
+        }
+      }
+    }`,
+});
+
+const post = data.post
+
+export async function getStaticPaths() {
+  const slugs = await wpquery({
+    query: `
+    {
+      posts{
+        nodes{
+          slug
+        }
+      }
+    }`,
+  });
+  return slugs.posts.nodes.map((post: any) => ({
+    params: { slug: post.slug }
+  }));
+}
+---
+
+<Layout title={post.title}>
+	<main>
+    <a href="/">Astro Blog</a>
+    <h1 set:html={post.title} />
+    <Fragment set:html={post.content} />
+	</main>
+</Layout>
+
+
+<style>
+	main {
+		margin: auto;
+		padding: 1rem;
+		width: 800px;
+		max-width: calc(100% - 2rem);
+		color: white;
+		font-size: 20px;
+		line-height: 1.6;
+	}
+
+	h1 {
+		font-size: 4rem;
+		font-weight: 700;
+		line-height: 1;
+		text-align: center;
+		margin-bottom: 1em;
+	}
+</style>
