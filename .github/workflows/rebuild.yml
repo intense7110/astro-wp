@@ -10,12 +10,23 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+
       - name: Install dependencies
         run: npm install
+
       - name: Build project
         run: npm run build
-      - name: Deploy to Netlify
-        run: npm run deploy
-        env:
-          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+
+      - name: 📂 Sync files
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./
+          server-dir: web/testup.website/deploy-test/
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            fileToExclude.txt
