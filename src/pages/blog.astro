@@ -21,7 +21,6 @@ const data = await wpquery({
 ---
 
 <Layout title="AstroとWordPressを使ったブログ記事ページ">
-  <Debug answer={data} />
 	<main>
 		<h1><span class="text-gradient">ブログ記事一覧</span></h1>
 		{
@@ -36,6 +35,7 @@ const data = await wpquery({
 		}
 	</main>
 </Layout>
+
 <style>
 	main {
 		margin: auto;
