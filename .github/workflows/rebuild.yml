@@ -17,6 +17,20 @@ jobs:
       - name: Build project
         run: npm run build
 
+      # OpenVPNクライアントのインストール
+      - name: Install OpenVPN
+        run: sudo apt-get update && sudo apt-get install -y openvpn
+
+      # VPN設定ファイルを配置
+      - name: Set up VPN configuration
+        run: echo "${{ secrets.VPN_CONFIG }}" > vpn-config.ovpn
+
+      # VPNに接続
+      - name: Connect to VPN
+        run: |
+          sudo openvpn --config vpn-config.ovpn --auth-user-pass <(echo -e "${{ secrets.VPN_USERNAME }}\n${{ secrets.VPN_PASSWORD }}") --daemon
+          sleep 10  # VPN接続が確立するまで待機
+
       - name: 📂 Sync files
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -30,3 +44,7 @@ jobs:
             **/.git*/**
             **/node_modules/**
             fileToExclude.txt
+
+      # VPN接続を切断
+      - name: Disconnect VPN
+        run: sudo killall openvpn
