@@ -23,8 +23,8 @@ jobs:
 
       # VPN設定ファイルを配置
       - name: Set up VPN configuration
-        run: echo "${{ secrets.VPN_CONFIG }}" > vpn-config.ovpn
-
+        run: |
+          printf "%s" "${{ secrets.VPN_CONFIG }}" > vpn-config.ovpn
       # VPNに接続
       - name: Connect to VPN
         run: |
