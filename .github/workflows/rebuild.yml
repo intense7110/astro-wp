@@ -51,14 +51,18 @@ jobs:
       #   if: steps.get_release.outputs.previous_release != null
       #   run: diff -r previous_build current_build
 
+      - name: Get current date and time
+        id: get_datetime
+        run: echo "RELEASE_DATETIME=$(date '+%Y-%m-%d-%H%M%S')" >> $GITHUB_ENV
+
       - name: Create GitHub Release
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: 'latest-release' # タグを使わない場合でも、リリース名として固定値を設定
-          release_name: 'Latest Release'
+          tag_name: 'release-${{ env.RELEASE_DATETIME }}'
+          release_name: 'Release ${{ env.RELEASE_DATETIME }}'
           draft: false
           prerelease: false
 
