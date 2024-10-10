@@ -29,8 +29,8 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo
             });
-            if (releases.length > 1) {
-              core.setOutput('previous_release', releases[1].tag_name);
+            if (releases.length > 0) {
+              core.setOutput('previous_release', releases[0].tag_name);
             } else {
               core.setOutput('previous_release', null);
             }
@@ -57,8 +57,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          tag_name: 'latest-release' # タグを使わない場合でも、リリース名として固定値を設定
+          release_name: 'Latest Release'
           draft: false
           prerelease: false
 
