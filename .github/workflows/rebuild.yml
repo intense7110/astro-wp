@@ -8,17 +8,61 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+      # リポジトリのコードをチェックアウト
+      - name: Checkout code
+        uses: actions/checkout@v3
 
+      # Node.js のセットアップ
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      # 依存関係をインストール
       - name: Install dependencies
         run: npm install
 
+      # ビルド
       - name: Build project
         run: npm run build
 
-      - name: Zip build files
-        run: zip -r build.zip ./dist
+      # ビルドされたアーティファクトを ZIP ファイルにまとめる
+      - name: Create ZIP file
+        run: zip -r release.zip ./dist
+
+      # アーティファクトをアップロードして GitHub リリースを作成
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ github.ref }}
+          name: Release ${{ github.ref }}
+          body: |
+            ## Changes in this release:
+            - Describe your changes here
+          artifacts: release.zip
+
+      # - name: Get current date and time
+      #   id: get_datetime
+      #   run: echo "RELEASE_DATETIME=$(date '+%Y-%m-%d-%H%M%S')" >> $GITHUB_ENV
+
+      # - name: Create GitHub Release
+      #   id: create_release
+      #   uses: actions/create-release@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     tag_name: 'release-${{ env.RELEASE_DATETIME }}'
+      #     release_name: 'Release ${{ env.RELEASE_DATETIME }}'
+      #     draft: false
+      #     prerelease: false
+
+      # - name: Upload ZIP to Release
+      #   uses: actions/upload-release-asset@v1
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #     asset_path: ./build.zip
+      #     asset_name: build.zip
+      #     asset_content_type: application/zip
 
       # - name: Get previous release
       #   id: get_release
@@ -50,29 +94,6 @@ jobs:
       # - name: Diff current and previous builds
       #   if: steps.get_release.outputs.previous_release != null
       #   run: diff -r previous_build current_build
-
-      - name: Get current date and time
-        id: get_datetime
-        run: echo "RELEASE_DATETIME=$(date '+%Y-%m-%d-%H%M%S')" >> $GITHUB_ENV
-
-      - name: Create GitHub Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: 'release-${{ env.RELEASE_DATETIME }}'
-          release_name: 'Release ${{ env.RELEASE_DATETIME }}'
-          draft: false
-          prerelease: false
-
-      - name: Upload ZIP to Release
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build.zip
-          asset_name: build.zip
-          asset_content_type: application/zip
 
       # - name: 📂 Sync files
       #   uses: SamKirkland/FTP-Deploy-Action@v4.3.5
