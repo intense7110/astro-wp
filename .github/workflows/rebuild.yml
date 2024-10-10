@@ -30,20 +30,20 @@ jobs:
       - name: Create ZIP file
         run: zip -r release.zip ./dist
 
+      - name: Get current date and time
+        id: get_datetime
+        run: echo "RELEASE_DATETIME=$(date '+%Y-%m-%d-%H%M%S')" >> $GITHUB_ENV
+
       # アーティファクトをアップロードして GitHub リリースを作成
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
-          tag: ${{ github.ref }}
-          name: Release ${{ github.ref }}
+          tag: release-${{ env.RELEASE_DATETIME }}
+          name: Release ${{ env.RELEASE_DATETIME }}
           body: |
             ## Changes in this release:
             - Describe your changes here
           artifacts: release.zip
-
-      # - name: Get current date and time
-      #   id: get_datetime
-      #   run: echo "RELEASE_DATETIME=$(date '+%Y-%m-%d-%H%M%S')" >> $GITHUB_ENV
 
       # - name: Create GitHub Release
       #   id: create_release
