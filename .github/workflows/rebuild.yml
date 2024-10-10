@@ -20,36 +20,36 @@ jobs:
       - name: Zip build files
         run: zip -r build.zip ./dist
 
-      - name: Get previous release
-        id: get_release
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const { data: releases } = await github.rest.repos.listReleases({
-              owner: context.repo.owner,
-              repo: context.repo.repo
-            });
-            if (releases.length > 0) {
-              core.setOutput('previous_release', releases[0].tag_name);
-            } else {
-              core.setOutput('previous_release', null);
-            }
+      # - name: Get previous release
+      #   id: get_release
+      #   uses: actions/github-script@v6
+      #   with:
+      #     script: |
+      #       const { data: releases } = await github.rest.repos.listReleases({
+      #         owner: context.repo.owner,
+      #         repo: context.repo.repo
+      #       });
+      #       if (releases.length > 0) {
+      #         core.setOutput('previous_release', releases[0].tag_name);
+      #       } else {
+      #         core.setOutput('previous_release', null);
+      #       }
 
-      - name: Download previous release asset
-        if: steps.get_release.outputs.previous_release != null
-        run: |
-          curl -L -o previous_build.zip $(curl -s https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ steps.get_release.outputs.previous_release }} | jq -r '.assets[0].browser_download_url')
+      # - name: Download previous release asset
+      #   if: steps.get_release.outputs.previous_release != null
+      #   run: |
+      #     curl -L -o previous_build.zip $(curl -s https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ steps.get_release.outputs.previous_release }} | jq -r '.assets[0].browser_download_url')
 
-      - name: Unzip previous release asset
-        if: steps.get_release.outputs.previous_release != null
-        run: unzip previous_build.zip -d previous_build
+      # - name: Unzip previous release asset
+      #   if: steps.get_release.outputs.previous_release != null
+      #   run: unzip previous_build.zip -d previous_build
 
-      - name: Unzip current build
-        run: unzip build.zip -d current_build
+      # - name: Unzip current build
+      #   run: unzip build.zip -d current_build
 
-      - name: Diff current and previous builds
-        if: steps.get_release.outputs.previous_release != null
-        run: diff -r previous_build current_build
+      # - name: Diff current and previous builds
+      #   if: steps.get_release.outputs.previous_release != null
+      #   run: diff -r previous_build current_build
 
       - name: Create GitHub Release
         id: create_release
