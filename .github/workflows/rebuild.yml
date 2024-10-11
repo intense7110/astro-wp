@@ -30,21 +30,6 @@ jobs:
       - name: Create ZIP file
         run: zip -r release.zip ./dist
 
-      # アーティファクトをアップロードして GitHub リリースを作成
-      - name: Get current date and time
-        id: get_datetime
-        run: echo "RELEASE_DATETIME=$(date '+%Y-%m-%d-%H%M%S')" >> $GITHUB_ENV
-
-      - name: Create Release
-        uses: ncipollo/release-action@v1
-        with:
-          tag: release-${{ env.RELEASE_DATETIME }}
-          name: Release ${{ env.RELEASE_DATETIME }}
-          body: |
-            ## Changes in this release:
-            - Describe your changes here
-          artifacts: release.zip
-
       # 前回のリリースを取得
       - name: Get previous release
         id: get_release
@@ -71,6 +56,21 @@ jobs:
       - name: Unzip previous release
         if: steps.get_release.outputs.previous_release != null
         run: unzip previous_release.zip -d previous_build
+
+      # アーティファクトをアップロードして GitHub リリースを作成
+      - name: Get current date and time
+        id: get_datetime
+        run: echo "RELEASE_DATETIME=$(date '+%Y-%m-%d-%H%M%S')" >> $GITHUB_ENV
+
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: release-${{ env.RELEASE_DATETIME }}
+          name: Release ${{ env.RELEASE_DATETIME }}
+          body: |
+            ## Changes in this release:
+            - Describe your changes here
+          artifacts: release.zip
 
       # 現在のビルドも解凍
       - name: Unzip current build
