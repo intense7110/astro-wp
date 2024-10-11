@@ -98,7 +98,7 @@ jobs:
 
       # 差分ディレクトリをzipに圧縮する
       - name: Zip the diff directory
-        run: zip -r diff_output.zip diff_output
+        run: zip -r diff_output.zip diff_output/current_build/dist
 
       # zip化されたファイルをアーティファクトとして保存
       - name: Upload zipped diff result as artifact
