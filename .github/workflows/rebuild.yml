@@ -87,7 +87,7 @@ jobs:
 
       - name: Compare with previous release and extract diff
         run: |
-          diff -qr previous_release current_build | grep -E "differ$" | awk '{print $2}' | while read file; do
+          diff -qr current_build previous_release | grep -E "differ$" | awk '{print $2}' | while read file; do
             cp --parents "$file" diff_output/
           done
 
