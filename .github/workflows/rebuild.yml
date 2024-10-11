@@ -125,11 +125,11 @@ jobs:
             **/node_modules/**
             **/src/**
             **/public/**
-            **/dist/**
             **/tsconfig.json/**
             **/.vscode/**
             **/.astro/**
             **/README.md*
             **/package.json*
             **/astro.config.mjs*
+            **/package-lock.json*
             fileToExclude.txt
