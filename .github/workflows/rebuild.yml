@@ -119,6 +119,8 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./
           server-dir: web/testup.website/deploy-test/
+          include: |
+            *.zip  # .zipファイルのみをアップロード
           exclude: |
             **/.git*
             **/.git*/**
