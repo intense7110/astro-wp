@@ -76,11 +76,17 @@ jobs:
       - name: Unzip current build
         run: unzip release.zip -d current_build
 
-      # 差分を抽出
-      - name: Generate diff between current and previous build
-        run: diff -qr previous_build current_build | grep '^Only in' > diff.txt
+      - name: List files in previous build
+        run: ls -l previous_build
 
-      # 差分を反映したディレクトリを作成
+      - name: List files in current build
+        run: ls -l current_build
+
+      - name: Generate diff between current and previous build
+        run: |
+          set +o pipefail  # パイプライン失敗時に処理を続ける
+          diff -qr previous_build current_build | grep '^Only in' > diff.txt || echo "No differences found."
+
       - name: Copy changed files to diff directory
         run: |
           mkdir -p diff_build
