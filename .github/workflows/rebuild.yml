@@ -85,7 +85,7 @@ jobs:
       - name: Generate diff between current and previous build
         run: |
           set +o pipefail  # パイプライン失敗時に処理を続ける
-          diff -qr previous_build current_build | grep '^Only in' > diff.txt || echo "No differences found."
+          diff -qr previous_build current_build > diff.txt || echo "No differences found"
 
       - name: Copy changed files to diff directory
         run: |
@@ -102,14 +102,7 @@ jobs:
 
       # 差分をZIP化
       - name: Zip the diff files
-        run: zip -r diff_release.zip ./diff_build
-
-      # 差分ZIPをアップロード
-      - name: Upload diff ZIP
-        uses: actions/upload-artifact@v3
-        with:
-          name: diff_build
-          path: ./diff_release.zip
+        run: zip -r diff_release-${{ env.RELEASE_DATETIME }}.zip ./diff_build
 
       - name: 📂 Sync files
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
