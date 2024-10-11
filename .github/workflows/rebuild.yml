@@ -96,9 +96,9 @@ jobs:
           name: diff-output
           path: diff_output.txt
 
-      # 差分をZIP化
-      - name: Zip the diff files
-        run: zip -r diff_release-${{ env.RELEASE_DATETIME }}.zip ./diff_build
+      # # 差分をZIP化
+      # - name: Zip the diff files
+      #   run: zip -r diff_release-${{ env.RELEASE_DATETIME }}.zip ./diff_build
 
       - name: 📂 Sync files
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
