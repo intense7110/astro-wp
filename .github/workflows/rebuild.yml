@@ -30,11 +30,11 @@ jobs:
       - name: Create ZIP file
         run: zip -r release.zip ./dist
 
+      # アーティファクトをアップロードして GitHub リリースを作成
       - name: Get current date and time
         id: get_datetime
         run: echo "RELEASE_DATETIME=$(date '+%Y-%m-%d-%H%M%S')" >> $GITHUB_ENV
 
-      # アーティファクトをアップロードして GitHub リリースを作成
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
@@ -45,66 +45,76 @@ jobs:
             - Describe your changes here
           artifacts: release.zip
 
-      # - name: Create GitHub Release
-      #   id: create_release
-      #   uses: actions/create-release@v1
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   with:
-      #     tag_name: 'release-${{ env.RELEASE_DATETIME }}'
-      #     release_name: 'Release ${{ env.RELEASE_DATETIME }}'
-      #     draft: false
-      #     prerelease: false
+      # 前回のリリースを取得
+      - name: Get previous release
+        id: get_release
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const { data: releases } = await github.rest.repos.listReleases({
+              owner: context.repo.owner,
+              repo: context.repo.repo
+            });
+            if (releases.length > 0) {
+              core.setOutput('previous_release', releases[0].tag_name);
+            } else {
+              core.setOutput('previous_release', null);
+            }
 
-      # - name: Upload ZIP to Release
-      #   uses: actions/upload-release-asset@v1
-      #   with:
-      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
-      #     asset_path: ./build.zip
-      #     asset_name: build.zip
-      #     asset_content_type: application/zip
+      # 前回のリリースファイルをダウンロード
+      - name: Download previous release asset
+        if: steps.get_release.outputs.previous_release != null
+        run: |
+          curl -L -o previous_build.zip $(curl -s https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ steps.get_release.outputs.previous_release }} | jq -r '.assets[0].browser_download_url')
 
-      # - name: Get previous release
-      #   id: get_release
-      #   uses: actions/github-script@v6
-      #   with:
-      #     script: |
-      #       const { data: releases } = await github.rest.repos.listReleases({
-      #         owner: context.repo.owner,
-      #         repo: context.repo.repo
-      #       });
-      #       if (releases.length > 0) {
-      #         core.setOutput('previous_release', releases[0].tag_name);
-      #       } else {
-      #         core.setOutput('previous_release', null);
-      #       }
+      # ダウンロードした前回のリリースを解凍
+      - name: Unzip previous release
+        if: steps.get_release.outputs.previous_release != null
+        run: unzip previous_build.zip -d previous_build
 
-      # - name: Download previous release asset
-      #   if: steps.get_release.outputs.previous_release != null
-      #   run: |
-      #     curl -L -o previous_build.zip $(curl -s https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ steps.get_release.outputs.previous_release }} | jq -r '.assets[0].browser_download_url')
+      # 現在のビルドも解凍
+      - name: Unzip current build
+        run: unzip build.zip -d current_build
 
-      # - name: Unzip previous release asset
-      #   if: steps.get_release.outputs.previous_release != null
-      #   run: unzip previous_build.zip -d previous_build
+      # 差分を抽出
+      - name: Generate diff between current and previous build
+        run: diff -qr previous_build current_build | grep '^Only in' > diff.txt
 
-      # - name: Unzip current build
-      #   run: unzip build.zip -d current_build
+      # 差分を反映したディレクトリを作成
+      - name: Copy changed files to diff directory
+        run: |
+          mkdir -p diff_build
+          cat diff.txt | while read line; do
+            src_path=$(echo $line | awk '{print $3 "/" $4}')
+            dest_path=$(echo $line | sed 's|Only in ||' | awk '{print $2}')
+            if [ -d $src_path ]; then
+              cp -r $src_path diff_build/$dest_path
+            else
+              cp $src_path diff_build/$dest_path
+            fi
+          done
 
-      # - name: Diff current and previous builds
-      #   if: steps.get_release.outputs.previous_release != null
-      #   run: diff -r previous_build current_build
+      # 差分をZIP化
+      - name: Zip the diff files
+        run: zip -r diff_build.zip ./diff_build
 
-      # - name: 📂 Sync files
-      #   uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-      #   with:
-      #     server: ${{ secrets.FTP_SERVER }}
-      #     username: ${{ secrets.FTP_USERNAME }}
-      #     password: ${{ secrets.FTP_PASSWORD }}
-      #     local-dir: ./dist/
-      #     server-dir: web/testup.website/deploy-test/
-      #     exclude: |
-      #       **/.git*
-      #       **/.git*/**
-      #       **/node_modules/**
-      #       fileToExclude.txt
+      # 差分ZIPをアップロード
+      - name: Upload diff ZIP
+        uses: actions/upload-artifact@v3
+        with:
+          name: diff_build
+          path: ./diff_build.zip
+
+      - name: 📂 Sync files
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./
+          server-dir: web/testup.website/deploy-test/
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            fileToExclude.txt
