@@ -84,7 +84,7 @@ jobs:
 
       # 現在のデプロイと直前のリリースファイルの差分を取得
       - name: Compare with previous release
-        run: diff -r previous_release current_build > diff_output.txt || true
+        run: diff -r previous_build current_build > diff_output.txt || true
 
       # 差分を表示
       - name: Output the differences
