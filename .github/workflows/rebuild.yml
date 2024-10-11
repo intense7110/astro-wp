@@ -82,23 +82,19 @@ jobs:
       - name: List files in current build
         run: ls -l current_build
 
-      - name: Generate diff between current and previous build
-        run: |
-          set +o pipefail  # パイプライン失敗時に処理を続ける
-          diff -qr previous_build current_build > diff.txt || echo "No differences found"
+      # 現在のデプロイと直前のリリースファイルの差分を取得
+      - name: Compare with previous release
+        run: diff -r previous_release current_build > diff_output.txt || true
 
-      - name: Copy changed files to diff directory
-        run: |
-          mkdir -p diff_build
-          cat diff.txt | while read line; do
-            src_path=$(echo $line | awk '{print $3 "/" $4}')
-            dest_path=$(echo $line | sed 's|Only in ||' | awk '{print $2}')
-            if [ -d $src_path ]; then
-              cp -r $src_path diff_build/$dest_path
-            else
-              cp $src_path diff_build/$dest_path
-            fi
-          done
+      # 差分を表示
+      - name: Output the differences
+        run: cat diff_output.txt
+
+      - name: Upload diff result as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: diff-output
+          path: diff_output.txt
 
       # 差分をZIP化
       - name: Zip the diff files
