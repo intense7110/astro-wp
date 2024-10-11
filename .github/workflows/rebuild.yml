@@ -98,32 +98,7 @@ jobs:
 
       # 差分ディレクトリをzipに圧縮する
       - name: Zip the diff directory
-        run: zip -r diff_output.zip diff_output/current_build/dist
-
-      # zip化されたファイルをアーティファクトとして保存
-      - name: Upload zipped diff result as artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: diff-output-zip
-          path: diff_output.zip
-
-      # # 現在のデプロイと直前のリリースファイルの差分を取得
-      # - name: Compare with previous release
-      #   run: diff -r previous_release current_build > diff_output.txt || true
-
-      # # 差分を表示
-      # - name: Output the differences
-      #   run: cat diff_output.txt
-
-      # - name: Upload diff result as artifact
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: diff-output
-      #     path: diff_output.txt
-
-      # # 差分をZIP化
-      # - name: Zip the diff files
-      #   run: zip -r diff_release-${{ env.RELEASE_DATETIME }}.zip ./diff_build
+        run: zip -r diff_release-${{ env.RELEASE_DATETIME }}.zip diff_output/current_build/dist
 
       - name: 📂 Sync files
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
