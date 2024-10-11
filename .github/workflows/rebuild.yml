@@ -91,7 +91,7 @@ jobs:
         run: cat diff_output.txt
 
       - name: Upload diff result as artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: diff-output
           path: diff_output.txt
