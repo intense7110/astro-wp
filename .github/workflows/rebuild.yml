@@ -119,10 +119,17 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./
           server-dir: web/testup.website/deploy-test/
-          include: |
-            *.zip  # .zipファイルのみをアップロード
           exclude: |
             **/.git*
             **/.git*/**
             **/node_modules/**
+            **/src/**
+            **/public/**
+            **/dist/**
+            **/tsconfig.json/**
+            **/.vscode/**
+            **/.astro/**
+            **/README.md*
+            **/package.json*
+            **/astro.config.mjs*
             fileToExclude.txt
