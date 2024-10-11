@@ -65,16 +65,16 @@ jobs:
       - name: Download previous release asset
         if: steps.get_release.outputs.previous_release != null
         run: |
-          curl -L -o previous_build.zip $(curl -s https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ steps.get_release.outputs.previous_release }} | jq -r '.assets[0].browser_download_url')
+          curl -L -o previous_release.zip $(curl -s https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ steps.get_release.outputs.previous_release }} | jq -r '.assets[0].browser_download_url')
 
       # ダウンロードした前回のリリースを解凍
       - name: Unzip previous release
         if: steps.get_release.outputs.previous_release != null
-        run: unzip previous_build.zip -d previous_build
+        run: unzip previous_release.zip -d previous_build
 
       # 現在のビルドも解凍
       - name: Unzip current build
-        run: unzip build.zip -d current_build
+        run: unzip release.zip -d current_build
 
       # 差分を抽出
       - name: Generate diff between current and previous build
@@ -96,14 +96,14 @@ jobs:
 
       # 差分をZIP化
       - name: Zip the diff files
-        run: zip -r diff_build.zip ./diff_build
+        run: zip -r diff_release.zip ./diff_build
 
       # 差分ZIPをアップロード
       - name: Upload diff ZIP
         uses: actions/upload-artifact@v3
         with:
           name: diff_build
-          path: ./diff_build.zip
+          path: ./diff_release.zip
 
       - name: 📂 Sync files
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
