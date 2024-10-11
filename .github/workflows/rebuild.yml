@@ -99,8 +99,9 @@ jobs:
       # 差分ディレクトリをzipに圧縮する
       - name: Zip the diff directory
         run: |
-          zip -r diff_release-${{ env.RELEASE_DATETIME }}.zip diff_output/current_build/dist
-          ls -lah
+          cd diff_output/current_build/dist
+          zip -r ../../../diff_release-${{ env.RELEASE_DATETIME }}.zip ./*
+          ls -lah ../../../diff_release-${{ env.RELEASE_DATETIME }}.zip
 
       - name: 📂 Sync files
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
